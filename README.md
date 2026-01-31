@@ -217,3 +217,4 @@ Monitor your usage to avoid unexpected charges!
 
 This project is for educational purposes as part of CRCP6370 - AI in the Metaverse class.
 # CRCP6370
+# CRCP6370
