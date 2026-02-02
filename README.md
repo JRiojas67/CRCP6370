@@ -69,14 +69,22 @@ pip install anthropic openai python-dotenv
 
 ### Step 4: Run the Chatbot
 
+**Terminal:**
 ```bash
 python3 chatbot_ai.py
 ```
 
-Or in VSCode:
+**Web browser (index.html):**
+```bash
+pip install flask
+python3 server.py
+```
+Then open **http://127.0.0.1:5000** in your browser to use the chatbot with a chat UI. You can change personality from the dropdown.
+
+**VSCode:**
 - Press `F5` to run with debugging
 - Use the Run button in the editor
-- Run from integrated terminal: `python3 chatbot_ai.py`
+- Run from integrated terminal: `python3 chatbot_ai.py` or `python3 server.py`
 
 ---
 

@@ -72,10 +72,12 @@ class AIChatbot:
         self.openai_client = None
         self.conversation_history = []
         self.personality = personality
-        self.system_prompt = self.PERSONALITIES.get(personality, self.PERSONALITIES["default"])
-        
+        self.system_prompt = self.PERSONALITIES.get(
+            personality, self.PERSONALITIES["default"])
+
         # Friend conversation features
-        self.friends = {}  # Dictionary to store friend personas: {name: {personality, system_prompt}}
+        # Dictionary to store friend personas: {name: {personality, system_prompt}}
+        self.friends = {}
         self.current_friend = None  # Currently active friend persona
         self.group_chat_mode = False  # Whether in group chat mode
         self.group_chat_friends = []  # List of friends in group chat
@@ -100,15 +102,11 @@ class AIChatbot:
 
         # Check if at least one provider is available
         if not self.claude_client and not self.openai_client:
-            print("\n❌ Error: No API keys found!")
-            print("Please set ANTHROPIC_API_KEY and/or OPENAI_API_KEY in your .env file")
-            print("See env.example for reference")
-            print("\nTo create .env file:")
-            print("  1. Copy env.example to .env: cp env.example .env")
-            print("  2. Edit .env and add your API keys")
-            print("  3. Get Claude key: https://console.anthropic.com/")
-            print("  4. Get OpenAI key: https://platform.openai.com/api-keys")
-            sys.exit(1)
+            msg = (
+                "No API keys found. Please set ANTHROPIC_API_KEY and/or OPENAI_API_KEY "
+                "in your .env file. See env.example for reference."
+            )
+            raise RuntimeError(msg)
 
     def chat_with_claude(self, message: str, model: str = "claude-3-5-sonnet-20241022") -> Optional[str]:
         """
@@ -170,13 +168,8 @@ class AIChatbot:
         try:
             # Prepare messages for ChatGPT (includes conversation history)
             # OpenAI uses "system", "user", and "assistant" roles
-            messages = []
-            
-            # Add system prompt if conversation history is empty
-            if not self.conversation_history:
-                messages.append({"role": "system", "content": self.system_prompt})
-            
-            # Add conversation history and new message
+            # Always include system prompt so personality is maintained every turn
+            messages = [{"role": "system", "content": self.system_prompt}]
             messages.extend(self.conversation_history)
             messages.append({"role": "user", "content": message})
 
@@ -240,11 +233,11 @@ class AIChatbot:
         """Clear the conversation history."""
         self.conversation_history = []
         print("Conversation history cleared!")
-    
+
     def set_personality(self, personality: str):
         """
         Change the chatbot's personality.
-        
+
         Args:
             personality: Name of personality to use
         """
@@ -258,11 +251,11 @@ class AIChatbot:
             available = ", ".join(self.PERSONALITIES.keys())
             print(f"❌ Unknown personality: {personality}")
             print(f"Available personalities: {available}\n")
-    
+
     def set_custom_personality(self, custom_prompt: str):
         """
         Set a custom personality prompt.
-        
+
         Args:
             custom_prompt: Custom personality description
         """
@@ -271,11 +264,11 @@ class AIChatbot:
         self.clear_history()
         print("✓ Custom personality set!")
         print(f"  {custom_prompt[:100]}...\n")
-    
+
     def add_friend(self, name: str, personality: str = "casual", custom_prompt: Optional[str] = None):
         """
         Add a friend persona to the conversation.
-        
+
         Args:
             name: Name of the friend
             personality: Personality type to use
@@ -284,15 +277,16 @@ class AIChatbot:
         if custom_prompt:
             prompt = custom_prompt
         else:
-            prompt = self.PERSONALITIES.get(personality, self.PERSONALITIES["casual"])
-        
+            prompt = self.PERSONALITIES.get(
+                personality, self.PERSONALITIES["casual"])
+
         self.friends[name] = {
             "personality": personality,
             "system_prompt": prompt,
             "history": []
         }
         print(f"✓ Friend '{name}' added with {personality} personality!\n")
-    
+
     def remove_friend(self, name: str):
         """Remove a friend persona."""
         if name in self.friends:
@@ -304,65 +298,69 @@ class AIChatbot:
             print(f"✓ Friend '{name}' removed.\n")
         else:
             print(f"❌ Friend '{name}' not found.\n")
-    
+
     def switch_to_friend(self, name: str):
         """Switch to a friend persona."""
         if name in self.friends:
             # Save current context before switching
             if self.current_friend:
-                self.friends[self.current_friend]["history"] = self.conversation_history.copy()
-            
+                self.friends[self.current_friend]["history"] = self.conversation_history.copy(
+                )
+
             self.current_friend = name
             self.system_prompt = self.friends[name]["system_prompt"]
             self.conversation_history = self.friends[name]["history"].copy()
             print(f"✓ Switched to {name}'s perspective\n")
         else:
-            print(f"❌ Friend '{name}' not found. Use /addfriend to create them.\n")
-    
+            print(
+                f"❌ Friend '{name}' not found. Use /addfriend to create them.\n")
+
     def switch_back_to_ai(self):
         """Switch back to the main AI chatbot."""
         if self.current_friend:
             # Save current friend's history
-            self.friends[self.current_friend]["history"] = self.conversation_history.copy()
+            self.friends[self.current_friend]["history"] = self.conversation_history.copy(
+            )
             self.current_friend = None
-            self.system_prompt = self.PERSONALITIES.get(self.personality, self.PERSONALITIES["default"])
+            self.system_prompt = self.PERSONALITIES.get(
+                self.personality, self.PERSONALITIES["default"])
             # Keep conversation history but clear it if user wants fresh start
             # self.conversation_history = []  # Uncomment if you want to clear history when switching back
             print("✓ Switched back to main AI chatbot\n")
         else:
             print("You're already using the main AI chatbot.\n")
-    
+
     def start_group_chat(self, friend_names: list):
         """Start a group chat with multiple friends."""
         valid_friends = [name for name in friend_names if name in self.friends]
         if not valid_friends:
             print("❌ No valid friends found. Add friends first with /addfriend\n")
             return
-        
+
         self.group_chat_mode = True
         self.group_chat_friends = valid_friends
         print(f"✓ Group chat started with: {', '.join(valid_friends)}\n")
         print("Friends will take turns responding. Type /endgroupchat to stop.\n")
-    
+
     def end_group_chat(self):
         """End group chat mode."""
         self.group_chat_mode = False
         self.group_chat_friends = []
         print("✓ Group chat ended\n")
-    
+
     def get_friend_response(self, friend_name: str, message: str, provider: Optional[Literal["claude", "chatgpt"]] = None) -> str:
         """Get a response from a specific friend."""
         if friend_name not in self.friends:
             return f"Error: Friend '{friend_name}' not found"
-        
+
         friend = self.friends[friend_name]
         original_system = self.system_prompt
         original_history = self.conversation_history
-        
+
         # Temporarily switch to friend's context
         self.system_prompt = friend["system_prompt"]
         self.conversation_history = friend["history"].copy()
-        
+
         # Get response
         provider = provider or self.default_provider
         if provider == "claude" and self.claude_client:
@@ -371,14 +369,14 @@ class AIChatbot:
             response = self.chat_with_chatgpt(message)
         else:
             response = "Error: No AI provider available"
-        
+
         # Update friend's history
         friend["history"] = self.conversation_history.copy()
-        
+
         # Restore original context
         self.system_prompt = original_system
         self.conversation_history = original_history
-        
+
         return response
 
     def chat(self):
@@ -482,7 +480,7 @@ class AIChatbot:
                                 print(f"  - {name}: {desc[:60]}...")
                             print("\nOr use: /personalities to see full list\n")
                         continue
-                    
+
                     elif command == "/personalities":
                         print("\n🎭 Available Personalities:")
                         print("-" * 60)
@@ -497,25 +495,28 @@ class AIChatbot:
                         parts = command.split()
                         if len(parts) >= 2:
                             friend_name = parts[1]
-                            personality = parts[2] if len(parts) > 2 else "casual"
+                            personality = parts[2] if len(
+                                parts) > 2 else "casual"
                             self.add_friend(friend_name, personality)
                         else:
                             print("Usage: /addfriend <name> [personality]")
                             print("Example: /addfriend Alex funny\n")
                         continue
-                    
+
                     elif command == "/friends":
                         if self.friends:
                             print("\n👥 Your Friends:")
                             print("-" * 60)
                             for name, friend_data in self.friends.items():
                                 current = " (active)" if name == self.current_friend else ""
-                                print(f"  • {name}{current}: {friend_data['personality']} personality")
+                                print(
+                                    f"  • {name}{current}: {friend_data['personality']} personality")
                             print("-" * 60 + "\n")
                         else:
-                            print("No friends added yet. Use /addfriend <name> to add one!\n")
+                            print(
+                                "No friends added yet. Use /addfriend <name> to add one!\n")
                         continue
-                    
+
                     elif command.startswith("/befriend"):
                         parts = command.split()
                         if len(parts) >= 2:
@@ -525,11 +526,11 @@ class AIChatbot:
                             print("Usage: /befriend <name>")
                             print("Example: /befriend Alex\n")
                         continue
-                    
+
                     elif command == "/back":
                         self.switch_back_to_ai()
                         continue
-                    
+
                     elif command.startswith("/removefriend"):
                         parts = command.split()
                         if len(parts) >= 2:
@@ -538,7 +539,7 @@ class AIChatbot:
                         else:
                             print("Usage: /removefriend <name>\n")
                         continue
-                    
+
                     elif command.startswith("/groupchat"):
                         parts = command.split()
                         if len(parts) >= 2:
@@ -548,7 +549,7 @@ class AIChatbot:
                             print("Usage: /groupchat <friend1> <friend2> ...")
                             print("Example: /groupchat Alex Sam\n")
                         continue
-                    
+
                     elif command == "/endgroupchat":
                         self.end_group_chat()
                         continue
@@ -560,7 +561,8 @@ class AIChatbot:
                         print("  /personality <name> - Change personality")
                         print("  /personalities - List available personalities")
                         print("\n👥 Friend Conversation Commands:")
-                        print("  /addfriend <name> [personality] - Add a friend persona")
+                        print(
+                            "  /addfriend <name> [personality] - Add a friend persona")
                         print("  /friends - List all friends")
                         print("  /befriend <name> - Talk as a friend")
                         print("  /back - Switch back to main AI")
@@ -589,8 +591,9 @@ class AIChatbot:
                             print(f"  {friend_name} is thinking...")
                             friend_response = self.get_friend_response(
                                 friend_name, user_input, provider=current_provider)
-                            responses.append(f"{friend_name}: {friend_response}")
-                        
+                            responses.append(
+                                f"{friend_name}: {friend_response}")
+
                         print("\n" + "\n\n".join(responses) + "\n")
                     except KeyboardInterrupt:
                         raise

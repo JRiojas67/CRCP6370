@@ -4,6 +4,7 @@
 anthropic>=0.18.0          # Anthropic Claude API
 openai>=1.12.0             # OpenAI ChatGPT API
 python-dotenv>=1.0.0       # Environment variable management
+flask>=3.0.0               # Web server for index.html chatbot UI
 
 # Optional: For advanced features
 # nltk>=3.8                # Natural language processing (for advanced chatbot)
