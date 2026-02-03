@@ -324,7 +324,7 @@
       <div class="welcome">
         <h2>Hi, I'm your AI chatbot</h2>
         <p>Choose a personality above and type a message to start. I can chat using Claude or ChatGPT.</p>
-        <p id="server-hint" style="display:none; margin-top:0.75rem; font-size:0.85rem; color:var(--accent);">Make sure the server is running: <code style="background:var(--surface); padding:0.2rem 0.4rem; border-radius:4px;">python3 server.py</code> — then open <a href="http://127.0.0.1:5000" style="color:var(--accent);">http://127.0.0.1:5000</a></p>
+        <p id="server-hint" style="display:none; margin-top:0.75rem; font-size:0.85rem; color:var(--accent);">Make sure the server is running: <code style="background:var(--surface); padding:0.2rem 0.4rem; border-radius:4px;">python3 server.py</code> — then open <a href="http://127.0.0.1:5500" style="color:var(--accent);">http://127.0.0.1:5500</a></p>
       </div>
     </div>
 
@@ -343,7 +343,7 @@
 
     // Use server URL when page is opened as file (file://) or from another origin
     const isFilePage = window.location.protocol === 'file:' || window.location.origin === 'null';
-    const API_BASE = isFilePage ? 'http://127.0.0.1:5000' : window.location.origin;
+    const API_BASE = isFilePage ? 'http://127.0.0.1:5500' : window.location.origin;
     if (isFilePage) {
       const hint = document.getElementById('server-hint');
       if (hint) hint.style.display = 'block';

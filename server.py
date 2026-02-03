@@ -2,7 +2,7 @@
 """
 Flask server to serve the chatbot web UI (index.html) and provide /api/chat.
 Run: python3 server.py
-Then open http://127.0.0.1:5000 in your browser.
+Then open http://127.0.0.1:5500 in your browser.
 """
 
 import os
@@ -28,8 +28,9 @@ app = Flask(__name__, static_folder=None)
 def add_cors(resp):
     """Allow frontend from file:// or other origins to call /api/chat."""
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    resp.headers["Access-Control-Allow-Methods"] = "OPTIONS, POST"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    resp.headers["Access-Control-Max-Age"] = "86400"
     return resp
 
 # One shared chatbot instance (created on first request)
@@ -56,10 +57,11 @@ def health():
     return jsonify({"ok": True, "message": "Chatbot server is running"})
 
 
-@app.route("/api/chat", methods=["OPTIONS", "POST"])
+@app.route("/api/chat", methods=["OPTIONS", "POST"], strict_slashes=False)
 def chat():
     if request.method == "OPTIONS":
-        return "", 204
+        resp = app.make_response(("", 204))
+        return resp
     try:
         body = request.get_json(force=True, silent=True) or {}
         message = (body.get("message") or "").strip()
@@ -87,5 +89,5 @@ def chat():
 
 if __name__ == "__main__":
     print("Starting CRCP6370 Chatbot server…")
-    print("Open http://127.0.0.1:5000 in your browser.")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    print("Open http://127.0.0.1:5500 in your browser.")
+    app.run(host="0.0.0.0", port=5500, debug=True)

@@ -79,7 +79,7 @@ python3 chatbot_ai.py
 pip install flask
 python3 server.py
 ```
-Then open **http://127.0.0.1:5000** in your browser to use the chatbot with a chat UI. You can change personality from the dropdown.
+Then open **http://127.0.0.1:5500** in your browser to use the chatbot with a chat UI. You can change personality from the dropdown.
 
 **VSCode:**
 - Press `F5` to run with debugging
