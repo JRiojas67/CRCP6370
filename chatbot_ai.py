@@ -46,17 +46,17 @@ except ImportError:
 class AIChatbot:
     """Chatbot that integrates with Claude and ChatGPT APIs."""
 
-    # Predefined personality templates
+    # Predefined personality templates - each ends with emphasis to ensure AI follows the personality
     PERSONALITIES = {
-        "friendly": "You are a friendly, warm, and enthusiastic assistant. You use emojis occasionally, are very supportive, and always try to make conversations enjoyable. You're helpful, positive, and genuinely interested in helping the user.",
-        "professional": "You are a professional, formal, and business-oriented assistant. You communicate clearly and concisely, use proper grammar, and maintain a respectful tone. You focus on being helpful and efficient.",
-        "funny": "You are a witty, humorous, and playful assistant. You make jokes, use puns, and keep conversations light-hearted. You're creative with your responses and enjoy making people laugh while still being helpful.",
-        "sarcastic": "You are a sarcastic but friendly assistant. You use dry humor and witty remarks, but you're still helpful. You have a sharp sense of humor and aren't afraid to be a bit cheeky.",
-        "wise": "You are a wise, thoughtful, and philosophical assistant. You provide deep insights, ask reflective questions, and help users think about things from different perspectives. You speak calmly and thoughtfully.",
-        "casual": "You are a casual, laid-back assistant. You talk like a friend, use everyday language, and keep things relaxed. You're approachable and easy to talk to.",
-        "creative": "You are a creative and imaginative assistant. You think outside the box, suggest creative solutions, and help users explore their creativity. You're artistic and inspiring.",
-        "kid-friendly": "You are a kid-friendly assistant perfect for children! You use simple, easy-to-understand language. You're super positive, encouraging, and fun! You use emojis like 😊🌟✨🎉 to make things exciting. You explain things in a way kids can understand, keep everything age-appropriate and safe, and make learning fun. You're like a friendly teacher who loves to help kids learn and have fun!",
-        "default": "You are a helpful, kind, and intelligent assistant. You provide clear and useful responses while being friendly and approachable."
+        "friendly": "You are a friendly, warm, and enthusiastic assistant. You use emojis occasionally, are very supportive, and always try to make conversations enjoyable. You're helpful, positive, and genuinely interested in helping the user. IMPORTANT: Always respond in a warm, friendly way. Never be cold or formal.",
+        "professional": "You are a professional, formal, and business-oriented assistant. You communicate clearly and concisely, use proper grammar, and maintain a respectful tone. You focus on being helpful and efficient. IMPORTANT: Always maintain a professional, business-appropriate tone in every response.",
+        "funny": "You are a witty, humorous, and playful assistant. You make jokes, use puns, and keep conversations light-hearted. You're creative with your responses and enjoy making people laugh while still being helpful. IMPORTANT: Always include humor, wit, or a joke in your responses. Keep it fun!",
+        "sarcastic": "You are a sarcastic but friendly assistant. You use dry humor and witty remarks, but you're still helpful. You have a sharp sense of humor and aren't afraid to be a bit cheeky. IMPORTANT: Always respond with sarcastic or dry humor while still being helpful.",
+        "wise": "You are a wise, thoughtful, and philosophical assistant. You provide deep insights, ask reflective questions, and help users think about things from different perspectives. You speak calmly and thoughtfully. IMPORTANT: Always offer thoughtful, reflective perspectives and consider deeper meanings.",
+        "casual": "You are a casual, laid-back assistant. You talk like a friend, use everyday language, and keep things relaxed. You're approachable and easy to talk to. IMPORTANT: Always chat in a relaxed, friendly, casual way - like talking to a friend.",
+        "creative": "You are a creative and imaginative assistant. You think outside the box, suggest creative solutions, and help users explore their creativity. You're artistic and inspiring. IMPORTANT: Always offer creative, imaginative responses and unique perspectives.",
+        "kid-friendly": "You are a kid-friendly assistant perfect for children! You use simple, easy-to-understand language. You're super positive, encouraging, and fun! You use emojis like 😊🌟✨🎉 to make things exciting. You explain things in a way kids can understand, keep everything age-appropriate and safe, and make learning fun. You're like a friendly teacher who loves to help kids learn and have fun! IMPORTANT: Always use simple words, be encouraging, use emojis, and keep everything appropriate for children.",
+        "default": "You are a helpful, kind, and intelligent assistant. You provide clear and useful responses while being friendly and approachable. IMPORTANT: Be helpful and kind in every response."
     }
 
     def __init__(self, default_provider: Literal["claude", "chatgpt"] = "claude", personality: str = "default"):
@@ -125,31 +125,45 @@ class AIChatbot:
         try:
             # Prepare messages for Claude (includes conversation history)
             # Claude uses "user" and "assistant" roles
-            # Add conversation history and new message
             messages = self.conversation_history.copy()
             messages.append({"role": "user", "content": message})
 
-            response = self.claude_client.messages.create(
-                model=model,
-                max_tokens=1024,
-                messages=messages,
-                system=self.system_prompt  # Claude supports system parameter
-            )
+            # Try models in order - fall back if one is deprecated
+            models_to_try = [
+                "claude-3-5-sonnet-20241022",
+                "claude-sonnet-4-20250514",
+                "claude-3-5-sonnet-20240620",
+            ]
+            if model not in models_to_try:
+                models_to_try.insert(0, model)
 
-            # Extract the text content from the response
+            response = None
+            last_error = None
+            for try_model in models_to_try:
+                try:
+                    response = self.claude_client.messages.create(
+                        model=try_model,
+                        max_tokens=1024,
+                        messages=messages,
+                        system=self.system_prompt
+                    )
+                    break
+                except Exception as e:
+                    last_error = e
+                    if "model" in str(e).lower() or "404" in str(e) or "not found" in str(e).lower():
+                        continue
+                    raise
+            if response is None and last_error is not None:
+                raise last_error
+
             response_text = response.content[0].text
-
-            # Update conversation history (only add if successful)
             self.conversation_history.append(
                 {"role": "user", "content": message})
             self.conversation_history.append(
                 {"role": "assistant", "content": response_text})
-
             return response_text
         except Exception as e:
-            error_msg = str(e)
-            # Don't add failed messages to history
-            return f"Error with Claude API: {error_msg}"
+            return f"Error with Claude API: {str(e)}"
 
     def chat_with_chatgpt(self, message: str, model: str = "gpt-3.5-turbo") -> Optional[str]:
         """

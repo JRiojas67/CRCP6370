@@ -72,8 +72,10 @@ def chat():
 
         bot = get_chatbot()
 
-        # Update personality for this session without clearing history
-        if personality != bot.personality and personality in bot.PERSONALITIES:
+        # Apply personality - use default if unknown
+        if personality not in bot.PERSONALITIES:
+            personality = "default"
+        if personality != bot.personality:
             bot.personality = personality
             bot.system_prompt = bot.PERSONALITIES[personality]
 
