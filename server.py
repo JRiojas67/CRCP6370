@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Flask server to serve the chatbot web UI (index.html) and provide /api/chat.
+Flask server for the chatbot. Runs on port 5500 (Live Server port).
 Run: python3 server.py
-Then open http://127.0.0.1:5500 in your browser.
+Then open http://127.0.0.1:5500 — same server serves the pages and API (no 404/405/403).
 """
 
 import os
@@ -28,7 +28,7 @@ app = Flask(__name__, static_folder=None)
 def add_cors(resp):
     """Allow frontend from file:// or other origins to call /api/chat."""
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Methods"] = "OPTIONS, POST"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS, POST"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     resp.headers["Access-Control-Max-Age"] = "86400"
     return resp
@@ -49,6 +49,18 @@ def get_chatbot():
 @app.route("/")
 def index():
     return send_from_directory(Path(__file__).resolve().parent, "index.html")
+
+
+@app.route("/api/chat.html")
+def chat_html():
+    """Serve the chat UI with all personalities."""
+    return send_from_directory(Path(__file__).resolve().parent, "api/chat.html")
+
+
+@app.route("/api/health.html")
+def health_html():
+    """Serve the API health status page."""
+    return send_from_directory(Path(__file__).resolve().parent, "api/health.html")
 
 
 @app.route("/api/health")
@@ -89,7 +101,10 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 
+# Run on 5500 so one server serves both UI and API (no CORS/404/405/403)
+PORT = 5500
+
 if __name__ == "__main__":
-    print("Starting CRCP6370 Chatbot server…")
-    print("Open http://127.0.0.1:5500 in your browser.")
-    app.run(host="0.0.0.0", port=5500, debug=True)
+    print("Starting CRCP6370 Chatbot on port %s…" % PORT)
+    print("Open http://127.0.0.1:%s in your browser." % PORT)
+    app.run(host="0.0.0.0", port=PORT, debug=True)

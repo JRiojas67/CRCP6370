@@ -74,16 +74,15 @@ pip install anthropic openai python-dotenv
 python3 chatbot_ai.py
 ```
 
-**Web browser (index.html):**
-```bash
-pip install flask
-python3 server.py
-```
-Then open **http://127.0.0.1:5500** in your browser to use the chatbot with a chat UI. You can change personality from the dropdown.
+**Web browser (all on port 5500):**
+
+Run `python3 server.py` — the app and API both run on **port 5500**.  
+Then open **http://127.0.0.1:5500** in your browser. Same origin = no 404, 405, or 403 errors.
+
+(Do not start the “Live Server” extension on 5500 at the same time, or the port will conflict.)
 
 **VSCode:**
 - Press `F5` to run with debugging
-- Use the Run button in the editor
 - Run from integrated terminal: `python3 chatbot_ai.py` or `python3 server.py`
 
 ---
@@ -191,6 +190,15 @@ CRCP6370/
 - **Rate Limits:** Both APIs have rate limits. If you hit them, wait a moment and try again.
 - **Invalid API Key:** Double-check your API keys in the `.env` file
 - **Network Issues:** Check your internet connection
+
+### 405 Method Not Allowed (chatbot / index.html)
+
+- **Endpoint:** Your app sends **POST** to **`/api/chat`**. The server only allows **OPTIONS** and **POST** on that URL.
+- **Typical causes:**
+  1. **Wrong URL** – Use the same server for page and API. Run `python3 server.py` and open **http://127.0.0.1:5500** (not file:// and not a different port).
+  2. **Wrong method** – The chat UI uses POST for `/api/chat`; the server allows OPTIONS and POST.
+  3. **403** – The server sends CORS headers; if you still see 403, ensure you’re opening http://127.0.0.1:5500 after starting `python3 server.py`.
+- **Quick check:** In DevTools → Network, the request to `/api/chat` should be **POST** and the URL should be **http://127.0.0.1:5500/api/chat** (same origin as the page).
 
 ### VSCode Issues
 

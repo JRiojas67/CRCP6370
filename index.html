@@ -324,7 +324,8 @@
       <div class="welcome">
         <h2>Hi, I'm your AI chatbot</h2>
         <p>Choose a personality above and type a message to start. I can chat using Claude or ChatGPT.</p>
-        <p id="server-hint" style="display:none; margin-top:0.75rem; font-size:0.85rem; color:var(--accent);">Make sure the server is running: <code style="background:var(--surface); padding:0.2rem 0.4rem; border-radius:4px;">python3 server.py</code> — then open <a href="http://127.0.0.1:5500" style="color:var(--accent);">http://127.0.0.1:5500</a></p>
+        <p style="margin-top:0.75rem; font-size:0.85rem;"><a href="/api/chat.html" style="color:var(--accent);">Chat page</a> · <a href="/api/health.html" style="color:var(--accent);">API health</a></p>
+        <p id="server-hint" style="display:none; margin-top:0.75rem; font-size:0.85rem; color:var(--accent);">Start the server: <code style="background:var(--surface); padding:0.2rem 0.4rem; border-radius:4px;">python3 server.py</code> then open <a href="http://127.0.0.1:5500" style="color:var(--accent);">http://127.0.0.1:5500</a></p>
       </div>
     </div>
 
@@ -341,10 +342,12 @@
     const personalitySelect = document.getElementById('personality');
     const statusEl = document.getElementById('status');
 
-    // Use server URL when page is opened as file (file://) or from another origin
-    const isFilePage = window.location.protocol === 'file:' || window.location.origin === 'null';
-    const API_BASE = isFilePage ? 'http://127.0.0.1:5500' : window.location.origin;
-    if (isFilePage) {
+    // Everything runs on port 5500: open http://127.0.0.1:5500 after running python3 server.py
+    const API_PORT = 5500;
+    const API_BASE = (window.location.protocol === 'file:' || window.location.origin === 'null')
+      ? 'http://127.0.0.1:' + API_PORT
+      : window.location.origin;
+    if (window.location.protocol === 'file:' || window.location.origin === 'null') {
       const hint = document.getElementById('server-hint');
       if (hint) hint.style.display = 'block';
     }

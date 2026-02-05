@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - CRCP6370 Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #1a1a1f;
+      --border: #2d2d35;
+      --text: #e8e8ed;
+      --text-muted: #8b8b98;
+      --accent: #7c6ef6;
+      --accent-soft: rgba(124, 110, 246, 0.15);
+      --bot-msg: #1e1d24;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; line-height: 1.5; }
+    header { padding: 1rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+    .logo { font-weight: 700; font-size: 1.25rem; color: var(--text); }
+    .logo span { color: var(--accent); }
+    .controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    label { font-size: 0.8rem; color: var(--text-muted); margin-right: 0.25rem; }
+    select { font-family: inherit; font-size: 0.875rem; padding: 0.5rem 0.75rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; min-width: 140px; }
+    select:hover, select:focus { border-color: var(--accent); outline: none; }
+    .status { font-size: 0.75rem; color: var(--text-muted); padding: 0.35rem 0.6rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+    .status.connected { color: #6ee7b7; border-color: rgba(110, 231, 183, 0.3); }
+    .status.error { color: #f87171; border-color: rgba(248, 113, 113, 0.3); }
+    main { flex: 1; display: flex; flex-direction: column; max-width: 800px; width: 100%; margin: 0 auto; padding: 1rem; height: calc(100vh - 140px); }
+    #messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1rem; }
+    .message { max-width: 85%; padding: 0.875rem 1rem; border-radius: var(--radius); animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .message.user { align-self: flex-end; background: var(--accent-soft); border: 1px solid rgba(124, 110, 246, 0.35); }
+    .message.bot { align-self: flex-start; background: var(--bot-msg); border: 1px solid var(--border); }
+    .message .sender { font-size: 0.7rem; font-weight: 600; color: var(--accent); margin-bottom: 0.35rem; }
+    .message.bot .sender { color: var(--text-muted); }
+    .message .content { font-size: 0.95rem; white-space: pre-wrap; word-break: break-word; }
+    .typing { align-self: flex-start; padding: 0.875rem 1rem; background: var(--bot-msg); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.875rem; color: var(--text-muted); }
+    .welcome { text-align: center; padding: 2rem 1rem; color: var(--text-muted); }
+    .welcome h2 { font-size: 1.25rem; color: var(--text); margin-bottom: 0.5rem; }
+    .welcome p { font-size: 0.9rem; max-width: 360px; margin: 0 auto; }
+    .input-area { display: flex; gap: 0.5rem; padding: 0.5rem 0; border-top: 1px solid var(--border); }
+    #input { flex: 1; font-family: inherit; font-size: 0.95rem; padding: 0.75rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); resize: none; min-height: 48px; max-height: 160px; }
+    #input:focus { border-color: var(--accent); outline: none; }
+    #send { font-family: inherit; font-size: 0.9rem; font-weight: 600; padding: 0.75rem 1.25rem; border-radius: var(--radius); border: none; background: var(--accent); color: white; cursor: pointer; }
+    #send:hover { background: #8b7cf8; }
+    #send:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">CRCP6370 <span>Chat</span></div>
+    <div class="controls">
+      <label for="personality">Personality</label>
+      <select id="personality">
+        <option value="default">Default</option>
+        <option value="friendly">Friendly</option>
+        <option value="professional">Professional</option>
+        <option value="funny">Funny</option>
+        <option value="sarcastic">Sarcastic</option>
+        <option value="wise">Wise</option>
+        <option value="casual">Casual</option>
+        <option value="creative">Creative</option>
+        <option value="kid-friendly">Kid-friendly</option>
+      </select>
+      <span class="status" id="status">Ready</span>
+    </div>
+  </header>
+  <main>
+    <div id="messages">
+      <div class="welcome">
+        <h2>Chat with all personalities</h2>
+        <p>Pick a personality above and ask anything. The chatbot will respond in that style (Default, Friendly, Professional, Funny, Sarcastic, Wise, Casual, Creative, or Kid-friendly).</p>
+      </div>
+    </div>
+    <div class="input-area">
+      <textarea id="input" placeholder="Type your message..." rows="1"></textarea>
+      <button type="button" id="send">Send</button>
+    </div>
+  </main>
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const personalitySelect = document.getElementById('personality');
+    const statusEl = document.getElementById('status');
+    const API_PORT = 5500;
+    const API_BASE = (window.location.protocol === 'file:' || window.location.origin === 'null')
+      ? 'http://127.0.0.1:' + API_PORT
+      : window.location.origin;
+
+    function clearWelcome() {
+      const w = messagesEl.querySelector('.welcome');
+      if (w) w.remove();
+    }
+    function setStatus(text, className = '') {
+      statusEl.textContent = text;
+      statusEl.className = 'status ' + className;
+    }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML.replace(/\n/g, '<br>');
+    }
+    function addMessage(content, isUser, sender) {
+      clearWelcome();
+      const div = document.createElement('div');
+      div.className = 'message ' + (isUser ? 'user' : 'bot');
+      div.innerHTML = (sender ? '<div class="sender">' + sender + '</div>' : '') + '<div class="content">' + escapeHtml(content) + '</div>';
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function showTyping() {
+      clearWelcome();
+      const div = document.createElement('div');
+      div.className = 'typing';
+      div.id = 'typing-indicator';
+      div.textContent = 'Thinking...';
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function hideTyping() {
+      const el = document.getElementById('typing-indicator');
+      if (el) el.remove();
+    }
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      addMessage(text, true, 'You');
+      sendBtn.disabled = true;
+      setStatus('Thinking…', 'connected');
+      showTyping();
+      try {
+        const personality = personalitySelect.value;
+        const res = await fetch(API_BASE + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, personality })
+        });
+        let data = {};
+        const responseText = await res.text();
+        if (responseText && responseText.trim()) {
+          try { data = JSON.parse(responseText); } catch (_) {}
+        }
+        if (!res.ok) {
+          const errMsg = data.error || data.detail || data.message || ('Error ' + res.status);
+          throw new Error(typeof errMsg === 'string' ? errMsg : 'Request failed');
+        }
+        hideTyping();
+        const reply = data.response ?? data.reply ?? data.message ?? '';
+        addMessage(String(reply).trim() || 'No response.', false, 'Chatbot');
+        setStatus('Ready');
+      } catch (err) {
+        hideTyping();
+        addMessage('Error: ' + (err.message || 'Network error. Start the server: python3 server.py'), false, 'Chatbot');
+        setStatus('Error', 'error');
+      } finally {
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    }
+    fetch(API_BASE + '/api/health').then(r => r.json()).then(d => { if (d && d.ok) setStatus('Ready'); }).catch(() => setStatus('Start server', 'error'));
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+    inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px'; });
+  </script>
+</body>
+</html>
