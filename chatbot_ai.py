@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-AI-Powered Chatbot with Claude and ChatGPT Integration
-A chatbot that can use both Anthropic's Claude and OpenAI's ChatGPT APIs.
+AI-Powered Chatbot with Claude and OpenAI Integration
+A chatbot that can use both Anthropic's Claude and OpenAI APIs.
 """
 
 import os
@@ -44,7 +44,7 @@ except ImportError:
 
 
 class AIChatbot:
-    """Chatbot that integrates with Claude and ChatGPT APIs."""
+    """Chatbot that integrates with Claude and OpenAI APIs."""
 
     # Predefined personality templates - each ends with emphasis to ensure AI follows the personality
     PERSONALITIES = {
@@ -59,12 +59,12 @@ class AIChatbot:
         "default": "You are a helpful, kind, and intelligent assistant. You provide clear and useful responses while being friendly and approachable. IMPORTANT: Be helpful and kind in every response."
     }
 
-    def __init__(self, default_provider: Literal["claude", "chatgpt"] = "claude", personality: str = "default"):
+    def __init__(self, default_provider: Literal["claude", "openai"] = "claude", personality: str = "default"):
         """
         Initialize the AI chatbot.
 
         Args:
-            default_provider: Default AI provider to use ("claude" or "chatgpt")
+            default_provider: Default AI provider to use ("claude" or "openai")
             personality: Personality to use (default: "default")
         """
         self.default_provider = default_provider
@@ -96,7 +96,7 @@ class AIChatbot:
             openai_api_key = os.getenv("OPENAI_API_KEY")
             if openai_api_key:
                 self.openai_client = OpenAI(api_key=openai_api_key)
-                print("✓ ChatGPT API initialized")
+                print("✓ OpenAI API initialized")
             else:
                 print("⚠ OPENAI_API_KEY not found in environment variables")
 
@@ -165,22 +165,22 @@ class AIChatbot:
         except Exception as e:
             return f"Error with Claude API: {str(e)}"
 
-    def chat_with_chatgpt(self, message: str, model: str = "gpt-3.5-turbo") -> Optional[str]:
+    def chat_with_openai(self, message: str, model: str = "gpt-4o-mini") -> Optional[str]:
         """
-        Send a message to ChatGPT and get a response.
+        Send a message to OpenAI and get a response.
 
         Args:
             message: User's message
-            model: OpenAI model to use (gpt-4, gpt-3.5-turbo, etc.)
+            model: OpenAI model to use (gpt-4o, gpt-4o-mini, gpt-3.5-turbo, etc.)
 
         Returns:
-            ChatGPT's response or None if error
+            OpenAI's response or None if error
         """
         if not self.openai_client:
             return None
 
         try:
-            # Prepare messages for ChatGPT (includes conversation history)
+            # Prepare messages for OpenAI (includes conversation history)
             # OpenAI uses "system", "user", and "assistant" roles
             # Always include system prompt so personality is maintained every turn
             messages = [{"role": "system", "content": self.system_prompt}]
@@ -207,15 +207,15 @@ class AIChatbot:
         except Exception as e:
             error_msg = str(e)
             # Don't add failed messages to history
-            return f"Error with ChatGPT API: {error_msg}"
+            return f"Error with OpenAI API: {error_msg}"
 
-    def get_response(self, message: str, provider: Optional[Literal["claude", "chatgpt"]] = None) -> str:
+    def get_response(self, message: str, provider: Optional[Literal["claude", "openai"]] = None) -> str:
         """
         Get a response from the specified AI provider.
 
         Args:
             message: User's message
-            provider: AI provider to use ("claude" or "chatgpt"). If None, uses default.
+            provider: AI provider to use ("claude" or "openai"). If None, uses default.
 
         Returns:
             AI's response
@@ -226,22 +226,22 @@ class AIChatbot:
             if self.claude_client:
                 return self.chat_with_claude(message)
             elif self.openai_client:
-                print("⚠ Claude not available, using ChatGPT instead...")
-                return self.chat_with_chatgpt(message)
+                print("⚠ Claude not available, using OpenAI instead...")
+                return self.chat_with_openai(message)
             else:
                 return "Error: No AI providers available"
 
-        elif provider == "chatgpt":
+        elif provider == "openai":
             if self.openai_client:
-                return self.chat_with_chatgpt(message)
+                return self.chat_with_openai(message)
             elif self.claude_client:
-                print("⚠ ChatGPT not available, using Claude instead...")
+                print("⚠ OpenAI not available, using Claude instead...")
                 return self.chat_with_claude(message)
             else:
                 return "Error: No AI providers available"
 
         else:
-            return f"Error: Unknown provider '{provider}'. Use 'claude' or 'chatgpt'."
+            return f"Error: Unknown provider '{provider}'. Use 'claude' or 'openai'."
 
     def clear_history(self):
         """Clear the conversation history."""
@@ -362,7 +362,7 @@ class AIChatbot:
         self.group_chat_friends = []
         print("✓ Group chat ended\n")
 
-    def get_friend_response(self, friend_name: str, message: str, provider: Optional[Literal["claude", "chatgpt"]] = None) -> str:
+    def get_friend_response(self, friend_name: str, message: str, provider: Optional[Literal["claude", "openai"]] = None) -> str:
         """Get a response from a specific friend."""
         if friend_name not in self.friends:
             return f"Error: Friend '{friend_name}' not found"
@@ -379,8 +379,8 @@ class AIChatbot:
         provider = provider or self.default_provider
         if provider == "claude" and self.claude_client:
             response = self.chat_with_claude(message)
-        elif provider == "chatgpt" and self.openai_client:
-            response = self.chat_with_chatgpt(message)
+        elif provider == "openai" and self.openai_client:
+            response = self.chat_with_openai(message)
         else:
             response = "Error: No AI provider available"
 
@@ -400,11 +400,11 @@ class AIChatbot:
             os.system('clear' if os.name == 'posix' else 'cls')
 
         print("\n" + "="*60)
-        print("🤖 AI-Powered Chatbot (Claude & ChatGPT)")
+        print("🤖 AI-Powered Chatbot (Claude & OpenAI)")
         print("="*60)
         print("\nAvailable commands:")
         print("  /claude    - Switch to Claude")
-        print("  /chatgpt   - Switch to ChatGPT")
+        print("  /openai    - Switch to OpenAI")
         print("  /personality <name> - Change personality")
         print("  /personalities - List available personalities")
         print("\n👥 Friend Conversation Commands:")
@@ -455,12 +455,12 @@ class AIChatbot:
                             print("❌ Claude not available (check API key)\n")
                         continue
 
-                    elif command == "/chatgpt" or command == "/gpt":
+                    elif command == "/openai" or command == "/gpt":
                         if self.openai_client:
-                            current_provider = "chatgpt"
-                            print("✓ Switched to ChatGPT\n")
+                            current_provider = "openai"
+                            print("✓ Switched to OpenAI\n")
                         else:
-                            print("❌ ChatGPT not available (check API key)\n")
+                            print("❌ OpenAI not available (check API key)\n")
                         continue
 
                     elif command == "/clear":
@@ -571,7 +571,7 @@ class AIChatbot:
                     elif command == "/help":
                         print("\nAvailable commands:")
                         print("  /claude    - Switch to Claude")
-                        print("  /chatgpt   - Switch to ChatGPT")
+                        print("  /openai    - Switch to OpenAI")
                         print("  /personality <name> - Change personality")
                         print("  /personalities - List available personalities")
                         print("\n👥 Friend Conversation Commands:")
@@ -651,7 +651,7 @@ def main():
     # Determine default provider based on available APIs
     default_provider = "claude"
     if not CLAUDE_AVAILABLE and OPENAI_AVAILABLE:
-        default_provider = "chatgpt"
+        default_provider = "openai"
 
     # Create and run chatbot
     chatbot = AIChatbot(default_provider=default_provider)

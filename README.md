@@ -4,12 +4,12 @@ This repository contains chatbot implementations for the AI in the Metaverse cla
 
 ## Chatbots Available
 
-### 1. AI-Powered Chatbot with Claude & ChatGPT (`chatbot_ai.py`) ⭐ NEW
+### 1. AI-Powered Chatbot with Claude & OpenAI (`chatbot_ai.py`) ⭐ NEW
 
-A sophisticated chatbot that integrates with both **Anthropic's Claude** and **OpenAI's ChatGPT** APIs. Switch between AI providers on the fly!
+A sophisticated chatbot that integrates with both **Anthropic's Claude** and **OpenAI** APIs. Switch between AI providers on the fly!
 
 **Features:**
-- 🤖 Dual AI provider support (Claude & ChatGPT)
+- 🤖 Dual AI provider support (Claude & OpenAI)
 - 💬 Conversation history management
 - 🔄 Switch between AI providers during conversation
 - 📜 View conversation history
@@ -47,7 +47,7 @@ pip install anthropic openai python-dotenv
    - Navigate to API Keys section
    - Create a new API key
 
-2. **ChatGPT API Key** (Optional but recommended):
+2. **OpenAI API Key** (Optional but recommended):
    - Visit: https://platform.openai.com/api-keys
    - Sign up or log in
    - Create a new API key
@@ -94,7 +94,7 @@ Then open **http://127.0.0.1:5500** in your browser. Same origin = no 404, 405, 
 Once the chatbot is running, you can use these commands:
 
 - `/claude` - Switch to Claude AI
-- `/chatgpt` or `/gpt` - Switch to ChatGPT
+- `/openai` or `/gpt` - Switch to OpenAI
 - `/clear` - Clear conversation history
 - `/history` - View conversation history
 - `/help` - Show help message
@@ -103,7 +103,7 @@ Once the chatbot is running, you can use these commands:
 ### Example Conversation
 
 ```
-🤖 AI-Powered Chatbot (Claude & ChatGPT)
+🤖 AI-Powered Chatbot (Claude & OpenAI)
 ============================================================
 
 Current provider: CLAUDE
@@ -117,13 +117,13 @@ What specific aspect would you like to learn about or work on?
 I can assist with syntax, best practices, debugging, or explain 
 concepts. What would you like to start with?
 
-You: /chatgpt
+You: /openai
 
-✓ Switched to ChatGPT
+✓ Switched to OpenAI
 
 You: What's the difference between lists and tuples?
 
-[CHATGPT] Thinking...
+[OPENAI] Thinking...
 
 AI: Lists and tuples are both sequence types in Python, but they 
 have key differences: Lists are mutable (can be modified), while 
@@ -160,7 +160,7 @@ tuples are immutable (cannot be changed after creation)...
 
 ```
 CRCP6370/
-├── chatbot_ai.py          # AI-powered chatbot (Claude & ChatGPT)
+├── chatbot_ai.py          # AI-powered chatbot (Claude & OpenAI)
 ├── chatbot.py             # Simple rule-based chatbot
 ├── chatbot_advanced.py    # NLTK-based chatbot
 ├── requirements.txt       # Python dependencies
@@ -209,10 +209,10 @@ CRCP6370/
 
 ## API Costs
 
-**Important:** Both Claude and ChatGPT APIs are **paid services** (though they may offer free credits):
+**Important:** Both Claude and OpenAI APIs are **paid services** (though they may offer free credits):
 
 - **Claude:** Check pricing at https://www.anthropic.com/pricing
-- **ChatGPT:** Check pricing at https://openai.com/pricing
+- **OpenAI:** Check pricing at https://openai.com/pricing
 
 Monitor your usage to avoid unexpected charges!
 

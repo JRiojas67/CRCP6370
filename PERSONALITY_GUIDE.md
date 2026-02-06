@@ -37,7 +37,7 @@ The chatbot comes with 9 built-in personalities:
 
 ### Other Commands
 - `/claude` - Switch to Claude AI
-- `/chatgpt` or `/gpt` - Switch to ChatGPT
+- `/openai` or `/gpt` - Switch to OpenAI
 - `/clear` - Clear conversation history
 - `/history` - View conversation history
 - `/help` - Show all commands
@@ -76,4 +76,4 @@ You can also create custom personalities by modifying the code. The personality 
 1. **Change personality anytime**: Use `/personality <name>` to switch personalities mid-conversation
 2. **Personality affects all responses**: The personality you choose affects how the AI responds to all your messages
 3. **Clear history when changing**: The chatbot automatically clears history when you change personalities to avoid confusion
-4. **Works with both AI providers**: Personalities work with both Claude and ChatGPT
+4. **Works with both AI providers**: Personalities work with both Claude and OpenAI
